@@ -32,7 +32,6 @@ Longer TODO:
 import imp
 import sys
 import os
-import datetime
 
 from path import Path as path
 from warnings import simplefilter
@@ -47,13 +46,13 @@ from lms.djangoapps.lms_xblock.mixin import LmsBlockMixin
 
 ################################### FEATURES ###################################
 # The display name of the platform to be used in templates/emails/etc.
-PLATFORM_NAME = "Your Platform Name Here"
+PLATFORM_NAME = "Microsoft Learning At CloudThat"
 CC_MERCHANT_NAME = PLATFORM_NAME
 # Shows up in the platform footer, eg "(c) COPYRIGHT_YEAR"
-COPYRIGHT_YEAR = datetime.date.today().year
+COPYRIGHT_YEAR = "2017"
 
-PLATFORM_FACEBOOK_ACCOUNT = "http://www.facebook.com/YourPlatformFacebookAccount"
-PLATFORM_TWITTER_ACCOUNT = "@YourPlatformTwitterAccount"
+PLATFORM_FACEBOOK_ACCOUNT = "http://www.facebook.com/cloudthat"
+PLATFORM_TWITTER_ACCOUNT = "@cloudthat"
 
 ENABLE_JASMINE = False
 
@@ -1004,6 +1003,7 @@ FEEDBACK_SUBMISSION_EMAIL = None
 ZENDESK_URL = None
 ZENDESK_USER = None
 ZENDESK_API_KEY = None
+ZENDESK_CUSTOM_FIELDS = {}
 
 ##### EMBARGO #####
 EMBARGO_SITE_REDIRECT_URL = None
@@ -1186,6 +1186,8 @@ MIDDLEWARE_CLASSES = (
     'course_wiki.middleware.WikiAccessMiddleware',
 
     'openedx.core.djangoapps.theming.middleware.CurrentSiteThemeMiddleware',
+
+    'waffle.middleware.WaffleMiddleware',
 
     # This must be last
     'openedx.core.djangoapps.site_configuration.middleware.SessionCookieDomainOverrideMiddleware',
@@ -1883,8 +1885,6 @@ YOUTUBE = {
     # YouTube JavaScript API
     'API': 'https://www.youtube.com/iframe_api',
 
-    'TEST_TIMEOUT': 1500,
-
     # URL to get YouTube metadata
     'METADATA_URL': 'https://www.googleapis.com/youtube/v3/videos/',
 
@@ -1923,6 +1923,7 @@ INSTALLED_APPS = (
 
     # Database-backed configuration
     'config_models',
+    'waffle',
 
     # Monitor the status of services
     'openedx.core.djangoapps.service_status',
@@ -2156,8 +2157,12 @@ INSTALLED_APPS = (
     # additional release utilities to ease automation
     'release_util',
 
-    # Unusual migrations
-    'database_fixups',
+    # Customized celery tasks, including persisting failed tasks so they can
+    # be retried
+    'openedx.core.djangoapps.celery_utils',
+
+    # Ability to detect and special-case crawler behavior
+    'openedx.core.djangoapps.crawlers',
 )
 
 # Migrations which are not in the standard module "migrations"
@@ -2179,6 +2184,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'openedx.core.lib.api.paginators.DefaultPagination',
     'PAGE_SIZE': 10,
     'URL_FORMAT_OVERRIDE': None,
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '60/minute',
+        'service_user': '120/minute',
+    },
 }
 
 
@@ -2819,9 +2828,9 @@ ACCOUNT_VISIBILITY_CONFIGURATION = {
 # E-Commerce API Configuration
 ECOMMERCE_PUBLIC_URL_ROOT = None
 ECOMMERCE_API_URL = None
-ECOMMERCE_API_SIGNING_KEY = None
 ECOMMERCE_API_TIMEOUT = 5
 ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
+ENTERPRISE_SERVICE_WORKER_USERNAME = 'enterprise_worker'
 
 COURSE_CATALOG_API_URL = None
 
